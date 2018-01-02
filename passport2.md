@@ -96,7 +96,6 @@ Cookies and sessions are both ways to preserve the application's state between d
 ### Using `bcrypt`
 
 - `bcryptjs` is an NPM module that helps us create password hashes to save to our database.
-- Let's check out [the documentation](https://www.npmjs.com/package/bcrypt) to learn how to implement this module.
 - We will implement this together with [passport](https://www.passportjs.org/) to create an authentication strategy for our Express application.
 
 #### Hashing and salting
@@ -223,13 +222,9 @@ how to take that information and turn it back into a user object (deserialize)
 
 
 ## 2 "Local Strategy"
-What, you might ask, is a strategy? Perhaps it seems like a strange word to encounter in the context of programming? Perhaps, but in the context it actually fits well.
+What, you might ask, is a strategy? Perhaps it seems like a strange word to encounter in the context of programming? 
 
-One of the key features of Passport as an authentication framework is that it is modular and extensible, meaning that it provides a loose framework for programmers to define their own pathways of authentication. It is opinionated about the series of steps that are followed to perform an authentication, but it remains neutral about the specific way that an application authenticates a user.
-
-Why is this a good thing? Well, let's say that in addition to a default username/password login we want to make it possible for users to login through their facebook or google accounts. Each of these methods would represent a unique "Strategy".
-
-- Passport Strategy - Passport recognizes that each application has unique authentication requirements. Authentication mechanisms, known as strategies, are packaged as individual modules. Applications can choose which strategies to employ, without creating unnecessary dependencies. For example, there are separate strategies for GitHub logins, Facebook logins, etc.
+- Passport recognizes that each application has unique authentication requirements. Authentication mechanisms, known as strategies, are packaged as individual modules. Applications can choose which strategies to employ, without creating unnecessary dependencies. For example, there are separate strategies for GitHub logins, Facebook logins, etc.
 
 ```javascript
 // services/auth/local.js
@@ -299,7 +294,7 @@ module.exports = {
 The `loginRequired` and `loginRedirect` functions are the actual middleware functions that we are going to insert into our apps function chain to control the flow of a request as it comes in. We are going to squeeze these functions somewhere before our route handlers so we can stop the chain if the user is not signed in.
 
 ## Auth routes
-Now that we have out middleware functions set up, we can create our auth routes.
+Now that we have our middleware functions set up, we can create our auth routes.
 
 ```
 touch routes/auth-routes.js controllers/users-controller.js
