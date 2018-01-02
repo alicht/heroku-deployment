@@ -60,7 +60,7 @@ app.use(session({
   saveUninitialized: true,
 }));
 
-app.use(passport.initialize());
+app.use(passport.initialize()); // <-- Registers the Passport middleware.
 app.use(passport.session());
 
 const authRouter = require('./routes/auth-routes');
