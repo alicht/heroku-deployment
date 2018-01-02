@@ -8,6 +8,10 @@
 4. Add authentication to Movies, so that users must be logged in in order to add or edit Movies.
 
 
+## Add a user
+
+
+
 ##  `Passport` 
 is authentication middleware for Node. It is designed to serve a singular purpose: authenticate requests. When writing modules, encapsulation is a virtue, so Passport delegates all other functionality to the application. This separation of concerns keeps code clean and maintainable, and makes Passport extremely easy to integrate into an application. 
 
@@ -149,7 +153,12 @@ module.exports = () => {
 #### what does deserializeUser do?
 
 
-### Passport Strategy
+## "Local Strategy"
+What, you might ask, is a strategy? Perhaps it seems like a strange word to encounter in the context of programming? Perhaps, but in the context it actually fits well.
+
+One of the key features of Passport as an authenication framework is that it is modular and extensible, meaning that it provides a loose framework for programmers to define their own pathways of authentication. It is opinionated about the series of steps that are followed to perform an authentication, but it remains neutral about the specific way that an application authenticates a user.
+
+Why is this a good thing? Well, let's say that in addition to a default username/password login we want to make it possible for users to login through their facebook or google accounts. Each of these methods would represent a unique "Strategy".
 
 ```javascript
 // services/auth/local.js
