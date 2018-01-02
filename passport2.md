@@ -3,7 +3,7 @@
 ### Learning Objectives
 
 1. Define authentication in the context of a web app.
-2. Explain what Passport and Passport strategies are and how they fit into the Express framework.
+2. Explain what Passport and Passport strategies are.
 3. Install Passport and set up a local authentication strategy.
 4. Add authentication to Movies, so that users must be logged in in order to add or edit Movies.
 
@@ -15,8 +15,6 @@ Authentication is for identifying users and provide different access rights and 
 ## First we need to create a User model
 
 The first thing we'll do is set up a user model to store user account info. We'll create a new migration to create the users table. We will be using passport so we need to have a `username` and `password_digest` column, and we'll add `email` as well.
-
-![screen shot 2018-01-02 at 1 23 29 am](https://user-images.githubusercontent.com/6153182/34475687-97902b32-ef5b-11e7-9433-371a530fad71.png)
 
 Create a migration file with the timestamp using `Date.now()`.
 
@@ -53,7 +51,7 @@ const User = {};
 User.findByUserName = userName => {
   return db.oneOrNone(`
     SELECT * FROM users
-    WHERE username = $1 // $ is used in sql as an anchoring operator
+    WHERE username = $1 
   `, [userName]);
 };
 
@@ -79,7 +77,7 @@ Passport is authentication middleware for Node. It is designed to serve a singul
 ### Cookies and Sessions
 https://stackoverflow.com/questions/11142882/how-do-cookies-and-sessions-work
 
-Cookies and sessions are both ways to persist information about your user. It's thanks to them that, for instance, you don't need to log in every time you request a page on Facebook.
+Cookies and sessions are both ways to preserve the application's state between different requests the browser makes. It's thanks to them that, for instance, you don't need to log in every time you request a page on Facebook.
 
 - Sessions are a way of temporarily persisting state (data) between requests. This is commonly used to 'remember' that a user is logged in.
 - It allows data to be passed throughout the application through cookies that are stored on the browser and matched up to a server-side store.
@@ -149,7 +147,7 @@ app.use(authHelpers.loginRequired)
 
 // all other routes go below here
 ```
-`cookie-parser` is similar to `body-parser` but it parses request cookies. Passport stores user auth info into cookies.
+`cookie-parser` is similar to `body-parser` but it parses request cookies. Passport stores user auth info into cookies. `cookie-parser` makes sure it's the same cookie every single time, information about user. To tie stuff from movies and directors to our users.
 
 `express-session`  will allow us to bounce user auth info back and forth every request, so the user doesn't have to reauthenticate every time they visit a new url on our app.
 
@@ -351,7 +349,7 @@ usersController.create = (req, res) => {
   }).then(user => {
     req.login(user, (err) => {
       if (err) return next(err);
-      res.redirect('/user');
+      res.redirect('/movies');
     });
   }).catch(err => {
     console.log(err);
@@ -377,6 +375,8 @@ touch views/auth/login.ejs views/auth/register.ejs
   <input name="password" type="password" placeholder="password" required />
   <input type="submit" value="Log in!" />
 </form>
+  
+<a href="/auth/register">Register Here</a>  
 ```
 
 ```html
