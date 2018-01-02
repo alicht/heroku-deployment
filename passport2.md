@@ -12,11 +12,9 @@
 Authentication is for identifying users and provide different access rights and content depending on their id. In most cases the application provides a login form with certain credentials to verify a user.
 
 
-## Add a user
+## First we need to create a User model
 
-# User model
-
-The first thing we'll do is set up a user model to store user account info. We'll create a new migration to  create the users table. We will be using passport so we need to have a `username` and `password_digest` column, and we'll add `email` as well.
+The first thing we'll do is set up a user model to store user account info. We'll create a new migration to create the users table. We will be using passport so we need to have a `username` and `password_digest` column, and we'll add `email` as well.
 
 ![screen shot 2018-01-02 at 1 23 29 am](https://user-images.githubusercontent.com/6153182/34475687-97902b32-ef5b-11e7-9433-371a530fad71.png)
 
