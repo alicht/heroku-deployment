@@ -7,13 +7,24 @@
 3. Install Passport and set up a local authentication strategy.
 4. Add authentication to Movies, so that users must be logged in in order to add or edit Movies.
 
+### What's authentication and why would I need it?
+
+
 
 ## Add a user
 
 # User model
 
-We need to set up a user model to store user account info. Create a new migration which will create the users table. We will be using passport so we need to have a `username` and `password_digest` column.
+The first thing we'll do is set up a user model to store user account info. We'll create a new migration to  create the users table. We will be using passport so we need to have a `username` and `password_digest` column.
 
+![screen shot 2018-01-02 at 1 23 29 am](https://user-images.githubusercontent.com/6153182/34475687-97902b32-ef5b-11e7-9433-371a530fad71.png)
+
+Create a migration file with the timestamp using `Date.now()`.
+
+```
+touch db/migrations/migration-1503681175400.sql
+```
+Add in our user info
 ```sql
 -- db/migrations/migration-1503764143787.sql
 
@@ -27,6 +38,11 @@ CREATE TABLE IF NOT EXISTS users (
 
 Make sure to run the migration.
 
+```sql
+psql -d movies_auth_dev -f db/migrations/migration-01022018.sql
+```
+
+
 No we have to create the user model.
 
 ```javascript
@@ -39,7 +55,7 @@ const User = {};
 User.findByUserName = userName => {
   return db.oneOrNone(`
     SELECT * FROM users
-    WHERE username = $1
+    WHERE username = $1 // $ is used in sql as an anchoring operator
   `, [userName]);
 };
 
@@ -55,7 +71,7 @@ User.create = user => {
 module.exports = User;
 ```
 
-As you can see, our user model only has a `create` and `findByUserName` function. This is because we will not be looking at user profiles or displaying a list of users. We will only be finding a user record when someone tries to sign in. If a user has not yet visited our app, we will allow them to create a user record.
+Our user model only has a `create` and `findByUserName` function. We will only be finding a user record when someone tries to sign in. If a user has not yet visited our app, we will allow them to create a user record.
 
 ```
 git add .
@@ -65,11 +81,15 @@ git push
 
 
 ##  `Passport` 
-is authentication middleware for Node. It is designed to serve a singular purpose: authenticate requests. When writing modules, encapsulation is a virtue, so Passport delegates all other functionality to the application. This separation of concerns keeps code clean and maintainable, and makes Passport extremely easy to integrate into an application. 
+Passport is authentication middleware for Node. It is designed to serve a singular purpose: authenticate requests. 
 
-### Sessions
+### Cookies and Sessions
+https://stackoverflow.com/questions/11142882/how-do-cookies-and-sessions-work
 
-- The session is an integral part of a web application.
+Cookies and sessions are both ways to preserve the application's state between different requests the browser makes. It's thanks to them that, for instance, you don't need to log in every time you request a page on StackOverflow.
+
+- integral part of a web application.
+- Sessions are a way of temporarily persisting state (data) between requests. This is commonly used to 'remember' that a user is logged in.
 - It allows data to be passed throughout the application through cookies that are stored on the browser and matched up to a server-side store.
 - Usually sessions are used to hold information about the logged in status of users as well as other data that needs to be accessed throughout the app.
 - We will be working with [express-session](https://github.com/expressjs/session) to enable sessions within our quotes app.
@@ -77,7 +97,7 @@ is authentication middleware for Node. It is designed to serve a singular purpos
 ### Password Encryption
 
 - When storing passwords in your database you **never** want to store plain text passwords. Ever.
-- There are a variety of encryption methods available including SHA1, SHA2, and Blowfish.
+- There are a variety of encryption methods available including SHA1, SHA2, and Blowfish. // Secure Hash Algorithm
 - Check out this [video on password security](https://www.youtube.com/watch?v=7U-RbOKanYs)
 
 ### Using `bcrypt`
@@ -86,11 +106,9 @@ is authentication middleware for Node. It is designed to serve a singular purpos
 - Let's check out [the documentation](https://www.npmjs.com/package/bcrypt) to learn how to implement this module.
 - We will implement this together with [passport](https://www.passportjs.org/) to create an authentication strategy for our Express application.
 
-# Implementing auth with passport
 
-- Passport - Passport is authentication middleware for Node. It is designed to serve a singular purpose: authenticate requests. When writing modules, encapsulation is a virtue, so Passport delegates all other functionality to the application. This separation of concerns keeps code clean and maintainable, and makes Passport extremely easy to integrate into an application. -
-  [Passport documentation](http://passportjs.org/docs/overview)
-- Passport Strategy - Passport recognizes that each application has unique authentication requirements. Authentication mechanisms, known as strategies, are packaged as individual modules. Applications can choose which strategies to employ, without creating unnecessary dependencies. For example, there are separate strategies for GitHub logins, Facebook logins, etc.
+
+
 
 #### Install the dependencies we will be using.
 
@@ -142,7 +160,7 @@ app.use(authHelpers.loginRequired)
 ```
 We are telling express to use the `cookie-parser`. This is similar to `body-parser` but it parses request cookies. Passport stores user auth info in to cookies.
 
-We are also telling express to use `express-session` which will allow use to bounce user auth info back and forth every request, so the user doesn't have to reauthenticate every time they visit a new url on our app.
+We are also telling express to use `express-session` which will allow us to bounce user auth info back and forth every request, so the user doesn't have to reauthenticate every time they visit a new url on our app.
 
 After we tell the app to use passport and passport sessions, we then require an auth router. This will have all of the routes for signing in and creating (registering) a user.
 
@@ -164,9 +182,9 @@ SESSION_KEY=whatever_key_you_want
 https://stackoverflow.com/questions/18565512/importance-of-session-secret-key-in-express-web-framework
 
 ## Why's the session key a secret and why do we need it?
-It's used to encrypt the session cookie so that you can be reasonably (but not 100%) sure the cookie isn't a fake one, and the connection should be treated as part of the larger session with express.
+It's used to encrypt the session cookie so that you can be reasonably sure the cookie isn't a fake one, and the connection should be treated as part of the larger session with express.
 This is why you don't put the string in your source code. You make it an environment variable and read it in as process.env("SESSION_SECRET") or you use an .env file with https://npmjs.org/package/habitat, and make sure those files never touch your repository (svn/git exclusion/ignores) so that your secret data stays secret.
-the secret is immutable while your node app runs. It's much better to just come up with a long, funny sentence than a UUID, which is generally much shorter than "I didn't think I needed a secret, but the voices in my head told me Express needed one".
+the secret is immutable while your node app runs. 
 
 
 ## Now that our app.js is in order, we can configure passport.
@@ -201,16 +219,22 @@ module.exports = () => {
 ```
 
 #### what does serializeUser do?
+https://stackoverflow.com/questions/27637609/understanding-passport-serialize-deserialize
+
+the functions tell Passport.js how to get information from a user object to store in a session (serialize)
 
 #### what does deserializeUser do?
+how to take that information and turn it back into a user object (deserialize)
 
 
 ## "Local Strategy"
 What, you might ask, is a strategy? Perhaps it seems like a strange word to encounter in the context of programming? Perhaps, but in the context it actually fits well.
 
-One of the key features of Passport as an authenication framework is that it is modular and extensible, meaning that it provides a loose framework for programmers to define their own pathways of authentication. It is opinionated about the series of steps that are followed to perform an authentication, but it remains neutral about the specific way that an application authenticates a user.
+One of the key features of Passport as an authentication framework is that it is modular and extensible, meaning that it provides a loose framework for programmers to define their own pathways of authentication. It is opinionated about the series of steps that are followed to perform an authentication, but it remains neutral about the specific way that an application authenticates a user.
 
 Why is this a good thing? Well, let's say that in addition to a default username/password login we want to make it possible for users to login through their facebook or google accounts. Each of these methods would represent a unique "Strategy".
+
+- Passport Strategy - Passport recognizes that each application has unique authentication requirements. Authentication mechanisms, known as strategies, are packaged as individual modules. Applications can choose which strategies to employ, without creating unnecessary dependencies. For example, there are separate strategies for GitHub logins, Facebook logins, etc.
 
 ```javascript
 // services/auth/local.js
