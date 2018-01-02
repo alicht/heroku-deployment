@@ -75,11 +75,13 @@ Our user model only has a `create` and `findByUserName` function. We will only b
 Passport is authentication middleware for Node. It is designed to serve a singular purpose: authenticate requests. 
 
 ### Cookies and Sessions
-https://stackoverflow.com/questions/11142882/how-do-cookies-and-sessions-work
+
+[helpful stack overflow explanation](https://stackoverflow.com/questions/11142882/how-do-cookies-and-sessions-work)
+
 
 Cookies and sessions are both ways to preserve the application's state between different requests the browser makes. It's thanks to them that, for instance, you don't need to log in every time you request a page on Facebook.
 
-- Sessions are a way of temporarily persisting state (data) between requests. This is commonly used to 'remember' that a user is logged in.
+- Sessions are a way of temporarily persisting data between requests. This is commonly used to 'remember' that a user is logged in.
 - It allows data to be passed throughout the application through cookies that are stored on the browser and matched up to a server-side store.
 - Usually sessions are used to hold information about the logged in status of users as well as other data that needs to be accessed throughout the app.
 - We will be working with [express-session](https://github.com/expressjs/session) to enable sessions within our quotes app.
@@ -87,7 +89,7 @@ Cookies and sessions are both ways to preserve the application's state between d
 ### Password Encryption
 
 - When storing passwords in your database you **NEVER** want to store plain text passwords.
-- There are a variety of encryption methods available including SHA1, SHA2, and Blowfish. // Secure Hash Algorithm
+- There are a variety of encryption methods available including SHA1, SHA2, and Blowfish. 
 
 ### Using `bcrypt`
 
@@ -147,7 +149,7 @@ app.use(authHelpers.loginRequired)
 
 // all other routes go below here
 ```
-`cookie-parser` is similar to `body-parser` but it parses request cookies. Passport stores user auth info into cookies. `cookie-parser` makes sure it's the same cookie every single time, information about user. To tie stuff from movies and directors to our users.
+Passport stores user auth info into cookies & `cookie-parser` makes sure it's the same cookie every single time, information about user. To tie stuff from movies and directors to our users.
 
 `express-session`  will allow us to bounce user auth info back and forth every request, so the user doesn't have to reauthenticate every time they visit a new url on our app.
 
@@ -169,9 +171,9 @@ SESSION_KEY=whatever_key_you_want
 **Make sure to add this to your `.gitignore!`**
 
 
-https://stackoverflow.com/questions/18565512/importance-of-session-secret-key-in-express-web-framework
-
 ## Why's the session key a secret and why do we need it?
+[stack overflow- importance of secret session key](https://stackoverflow.com/questions/18565512/importance-of-session-secret-key-in-express-web-framework)
+
 Used to encrypt the session cookie so that you can be reasonably sure the cookie isn't a fake one, and the connection should be treated as part of the larger session with express.
 
 
@@ -210,15 +212,17 @@ module.exports = () => {
 ```
 
 #### what do serializeUser & deserializeUser do?
-https://stackoverflow.com/questions/27637609/understanding-passport-serialize-deserialize
+[stack overflow- Serialize & deserialize](https://stackoverflow.com/questions/27637609/understanding-passport-serialize-deserialize)
 
-the functions tell Passport.js how to get information from a user object to store in a session (serialize)
 
-how to take that information and turn it back into a user object (deserialize)
+
+`Serialize`- the functions tell Passport.js how to get information from a user object to store in a session
+
+`Deserialize`- how to take that information and turn it back into a user object 
 
 
 ## 2 "Local Strategy"
-What, you might ask, is a strategy? Perhaps it seems like a strange word to encounter in the context of programming? 
+What, you might ask, is a strategy? Perhaps it seems like a strange word to encounter in the context of coding? 
 
 - Passport recognizes that each application has unique authentication requirements. Authentication mechanisms, known as strategies, are packaged as individual modules. Applications can choose which strategies to employ, without creating unnecessary dependencies. For example, there are separate strategies for GitHub logins, Facebook logins, etc.
 
