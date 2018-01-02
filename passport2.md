@@ -43,7 +43,7 @@ psql -d movies_auth_dev -f db/migrations/migration-01022018.sql
 ```
 
 
-No we have to create the user model.
+Now we have to create the user model.
 
 ```javascript
 // models/user.js
@@ -81,7 +81,7 @@ Passport is authentication middleware for Node. It is designed to serve a singul
 ### Cookies and Sessions
 https://stackoverflow.com/questions/11142882/how-do-cookies-and-sessions-work
 
-Cookies and sessions are both ways to preserve the application's state between different requests the browser makes. It's thanks to them that, for instance, you don't need to log in every time you request a page on StackOverflow.
+Cookies and sessions are both ways to preserve the application's state between different requests the browser makes. It's thanks to them that, for instance, you don't need to log in every time you request a page on Facebook.
 
 - Sessions are a way of temporarily persisting state (data) between requests. This is commonly used to 'remember' that a user is logged in.
 - It allows data to be passed throughout the application through cookies that are stored on the browser and matched up to a server-side store.
