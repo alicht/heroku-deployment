@@ -24,7 +24,19 @@ is authentication middleware for Node. It is designed to serve a singular purpos
 - There are a variety of encryption methods available including SHA1, SHA2, and Blowfish.
 - Check out this [video on password security](https://www.youtube.com/watch?v=7U-RbOKanYs)
 
-Install the dependencies we will be using.
+### Using `bcrypt`
+
+- `bcryptjs` is an NPM module that helps us create password hashes to save to our database.
+- Let's check out [the documentation](https://www.npmjs.com/package/bcrypt) to learn how to implement this module.
+- We will implement this together with [passport](https://www.passportjs.org/) to create an authentication strategy for our Express application.
+
+# Implementing auth with passport
+
+- Passport - Passport is authentication middleware for Node. It is designed to serve a singular purpose: authenticate requests. When writing modules, encapsulation is a virtue, so Passport delegates all other functionality to the application. This separation of concerns keeps code clean and maintainable, and makes Passport extremely easy to integrate into an application. -
+  [Passport documentation](http://passportjs.org/docs/overview)
+- Passport Strategy - Passport recognizes that each application has unique authentication requirements. Authentication mechanisms, known as strategies, are packaged as individual modules. Applications can choose which strategies to employ, without creating unnecessary dependencies. For example, there are separate strategies for GitHub logins, Facebook logins, etc.
+
+#### Install the dependencies we will be using.
 
 # Setting up passport
 
@@ -52,16 +64,17 @@ const passport = require('passport');
 require('dotenv').config();
 
 
-app.use(cookieParser());
+app.use(cookieParser()); // read cookies (needed for auth)
+app.use(bodyParser()); // get information from html forms
 
 app.use(session({
-  secret: process.env.SESSION_KEY,
+  secret: process.env.SESSION_KEY, // session secret
   resave: false,
   saveUninitialized: true,
 }));
 
 app.use(passport.initialize()); // <-- Registers the Passport middleware.
-app.use(passport.session());
+app.use(passport.session()); // persistent login sessions
 
 const authRouter = require('./routes/auth-routes');
 app.use('/auth', authRouter);
@@ -91,12 +104,23 @@ SESSION_KEY=whatever_key_you_want
 
 **Make sure to add this to your `.gitignore!`**
 
+
+https://stackoverflow.com/questions/18565512/importance-of-session-secret-key-in-express-web-framework
+
+## Why's the session key a secret and why do we need it?
+It's used to encrypt the session cookie so that you can be reasonably (but not 100%) sure the cookie isn't a fake one, and the connection should be treated as part of the larger session with express.
+This is why you don't put the string in your source code. You make it an environment variable and read it in as process.env("SESSION_SECRET") or you use an .env file with https://npmjs.org/package/habitat, and make sure those files never touch your repository (svn/git exclusion/ignores) so that your secret data stays secret.
+the secret is immutable while your node app runs. It's much better to just come up with a long, funny sentence than a UUID, which is generally much shorter than "I didn't think I needed a secret, but the voices in my head told me Express needed one".
+
+
 ## Now that our app.js is in order, we can configure passport.
 
 ```
 mkdir -p services/auth
 touch services/auth/passport.js services/auth/local.js services/auth/auth-helpers.js
 ```
+
+## Passport
 
 ```javascript
 // services/auth/passport.js
@@ -119,6 +143,13 @@ module.exports = () => {
   });
 };
 ```
+
+#### what does serializeUser do?
+
+#### what does deserializeUser do?
+
+
+### Passport Strategy
 
 ```javascript
 // services/auth/local.js
@@ -155,6 +186,7 @@ passport.use(
 
 module.exports = passport;
 ```
+## Authentication middleware
 
 Now that passport has been told how to find a user and check a password for a user, we can create some authentication middleware.
 
@@ -186,6 +218,7 @@ module.exports = {
 
 The `loginRequired` and `loginRedirect` functions are the actual middleware functions that we are going to insert into our apps function chain to control the flow of a request as it comes in. Remember the Legos! We are going to squeeze these functions somewhere before our route handlers so we can stop the chain if the user is not signed in.
 
+## Auth routes
 Now that we have out middleware functions set up, we can create our auth routes.
 
 ```
