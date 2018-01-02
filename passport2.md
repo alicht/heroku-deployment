@@ -9,13 +9,14 @@
 
 ### What's authentication and why would I need it?
 
+Authentication is for identifying users and provide different access rights and content depending on their id. In most cases the application provides a login form with certain credentials to verify a user.
 
 
 ## Add a user
 
 # User model
 
-The first thing we'll do is set up a user model to store user account info. We'll create a new migration to  create the users table. We will be using passport so we need to have a `username` and `password_digest` column.
+The first thing we'll do is set up a user model to store user account info. We'll create a new migration to  create the users table. We will be using passport so we need to have a `username` and `password_digest` column, and we'll add `email` as well.
 
 ![screen shot 2018-01-02 at 1 23 29 am](https://user-images.githubusercontent.com/6153182/34475687-97902b32-ef5b-11e7-9433-371a530fad71.png)
 
@@ -35,7 +36,6 @@ CREATE TABLE IF NOT EXISTS users (
   password_digest TEXT NOT NULL
 );
 ```
-
 Make sure to run the migration.
 
 ```sql
@@ -73,11 +73,6 @@ module.exports = User;
 
 Our user model only has a `create` and `findByUserName` function. We will only be finding a user record when someone tries to sign in. If a user has not yet visited our app, we will allow them to create a user record.
 
-```
-git add .
-git commit -m "Add user model"
-git push
-```
 
 
 #  `Passport` 
@@ -95,7 +90,7 @@ Cookies and sessions are both ways to preserve the application's state between d
 
 ### Password Encryption
 
-- When storing passwords in your database you **never** want to store plain text passwords. Ever.
+- When storing passwords in your database you **NEVER** want to store plain text passwords.
 - There are a variety of encryption methods available including SHA1, SHA2, and Blowfish. // Secure Hash Algorithm
 
 ### Using `bcrypt`
@@ -103,6 +98,11 @@ Cookies and sessions are both ways to preserve the application's state between d
 - `bcryptjs` is an NPM module that helps us create password hashes to save to our database.
 - Let's check out [the documentation](https://www.npmjs.com/package/bcrypt) to learn how to implement this module.
 - We will implement this together with [passport](https://www.passportjs.org/) to create an authentication strategy for our Express application.
+
+#### Hashing and salting
+Cryptographic hash functions take a piece of information and return a string, representing this information. Hash values cannot easily be “unhashed” or decrypted and that’s why they are a perfect fit for passwords.
+
+Salt values are random data that is included with the input for the hash function.
 
 
 #### Install the dependencies we will be using.
@@ -131,7 +131,6 @@ const session = require('express-session');
 const passport = require('passport');
 
 require('dotenv').config(); 
-
 
 app.use(cookieParser()); // read cookies (needed for auth)
 app.use(bodyParser()); // get information from html forms
@@ -339,6 +338,7 @@ authRouter.get('/logout', (req, res) => {
 
 module.exports = authRouter;
 ```
+and to our controller
 
 ```javascript
 // controllers/users-controller.js
