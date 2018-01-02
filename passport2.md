@@ -45,20 +45,21 @@ npm install --save passport passport-local express-session cookie-parser bcryptj
 
 ```javascript
 // app.js
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const passport = require('passport');
 
 require('dotenv').config();
 
-const cookieParser = require('cookie-parser');
+
 app.use(cookieParser());
 
-const session = require('express-session');
 app.use(session({
   secret: process.env.SESSION_KEY,
   resave: false,
   saveUninitialized: true,
 }));
 
-const passport = require('passport');
 app.use(passport.initialize());
 app.use(passport.session());
 
