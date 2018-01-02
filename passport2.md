@@ -1,52 +1,32 @@
-## passport 2
+# Express auth!
 
-```
-touch db/migrations/migration-1514862925942.sql
-```
+### Learning Objectives
 
-we'll migrate this 
+1. Define authentication in the context of a web app.
+2. Explain what Passport and Passport strategies are and how they fit into the Express framework.
+3. Install Passport and set up a local authentication strategy.
+4. Add authentication to Movies, so that users must be logged in in order to add or edit Movies.
 
-```
-psql -d movies_auth_dev -f db/migrations/migration-1514862925942.sql
-```
 
-Make sure to run the migration.
-
-No we have to create the user model.
-
-```javascript
-// models/user.js
-
-const db = require('../db/config');
-
-const User = {};
-
-User.findByUserName = userName => {
-  return db.oneOrNone(`
-    SELECT * FROM users
-    WHERE username = $1
-  `, [userName]);
-};
-
-User.create = user => {
-  return db.one(`
-    INSERT INTO users
-    (username, email, password_digest)
-    VALUES ($1, $2, $3)
-    RETURNING *
-  `, [user.username, user.email, user.password_digest]);
-};
-
-module.exports = User;
-```
-
-# Setting up passport
+##  `Passport` 
+is authentication middleware for Node. It is designed to serve a singular purpose: authenticate requests. When writing modules, encapsulation is a virtue, so Passport delegates all other functionality to the application. This separation of concerns keeps code clean and maintainable, and makes Passport extremely easy to integrate into an application. 
 
 Install the dependencies we will be using.
 
+# Setting up passport
+
 ```
-npm install --save passport passport-local express-session cookies-parser bcryptjs dotenv
+npm install --save passport passport-local express-session cookie-parser bcryptjs dotenv
 ```
+
+-  `passport`: express middleware to handle authentication
+-  `passport-local`: passport strategy to set up the username-password login flow
+-  `bcryptjs` is an NPM module that helps us create password hashes to save to our database.
+-  `express-session`: to store our sessions on the express server. 
+-  `cookie-parser`: to parse cookies
+-  `bcryptjs`: the blowfish encryption package to encrypt and decrypt our passwords. (**NOTE**: There's also a package `bcrypt`. We want `bcryptjs`.)
+-  `dotenv`
+
 
 Now let's tell our app how to use them.
 
@@ -77,24 +57,3 @@ app.use(authHelpers.loginRequired)
 
 // all other routes go below here
 ```
-
-We are telling express to use the `cookie-parser`. This is similar to `body-parser` but it parses request cookies. Passport stores user auth info in to cookies.
-
-We are also telling express to use `express-session` which will allow use to bounce user auth info back and forth every request, so the user doesn't have to reauthenticate every time they visit a new url on our app.
-
-After we tell the app to use passport and passport sessions, we then require an auth router. This will have all of the routes for signing in and creating (registering) a user.
-
-After that, we are requireing a middleware that we will write called `authHelpers.loginRequired`. We are telling our app to use this function before we tell it to use all of our other routes. This is because we want our app to require a user to be signed in for all routes except the user login and registration pages.
-
-> Note: We haven't written this `auth-helpers` middlware or the `auth-routes` yet. But it's still ok to write this in our app.js file because it will give us a sence of what our next tasks sould be.
-
-Lastly, for this `app.js` to be configures properly, we need a `.env` file with a SESSION_KEY.
-
-```bash
-# .env
-
-SESSION_KEY=whatever_key_you_want
-```
-
-**Make sure to add this to your `.gitignore!`**
-
