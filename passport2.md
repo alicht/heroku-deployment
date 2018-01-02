@@ -80,7 +80,7 @@ git push
 ```
 
 
-##  `Passport` 
+#  `Passport` 
 Passport is authentication middleware for Node. It is designed to serve a singular purpose: authenticate requests. 
 
 ### Cookies and Sessions
@@ -88,7 +88,6 @@ https://stackoverflow.com/questions/11142882/how-do-cookies-and-sessions-work
 
 Cookies and sessions are both ways to preserve the application's state between different requests the browser makes. It's thanks to them that, for instance, you don't need to log in every time you request a page on StackOverflow.
 
-- integral part of a web application.
 - Sessions are a way of temporarily persisting state (data) between requests. This is commonly used to 'remember' that a user is logged in.
 - It allows data to be passed throughout the application through cookies that are stored on the browser and matched up to a server-side store.
 - Usually sessions are used to hold information about the logged in status of users as well as other data that needs to be accessed throughout the app.
@@ -98,16 +97,12 @@ Cookies and sessions are both ways to preserve the application's state between d
 
 - When storing passwords in your database you **never** want to store plain text passwords. Ever.
 - There are a variety of encryption methods available including SHA1, SHA2, and Blowfish. // Secure Hash Algorithm
-- Check out this [video on password security](https://www.youtube.com/watch?v=7U-RbOKanYs)
 
 ### Using `bcrypt`
 
 - `bcryptjs` is an NPM module that helps us create password hashes to save to our database.
 - Let's check out [the documentation](https://www.npmjs.com/package/bcrypt) to learn how to implement this module.
 - We will implement this together with [passport](https://www.passportjs.org/) to create an authentication strategy for our Express application.
-
-
-
 
 
 #### Install the dependencies we will be using.
@@ -123,19 +118,19 @@ npm install --save passport passport-local express-session cookie-parser bcryptj
 -  `bcryptjs` is an NPM module that helps us create password hashes to save to our database.
 -  `express-session`: to store our sessions on the express server. 
 -  `cookie-parser`: to parse cookies
--  `bcryptjs`: the blowfish encryption package to encrypt and decrypt our passwords. (**NOTE**: There's also a package `bcrypt`. We want `bcryptjs`.)
--  `dotenv`
+-  `bcryptjs`: encryption package to encrypt and decrypt our passwords. (**NOTE**: There's also a package `bcrypt`. We want `bcryptjs`.)
+-  `dotenv`: a zero-dependency module that loads environment variables from a .env file into process.env.
 
 
-## Now let's tell our app how to use them.
+## Now let's tell our app how to use these dependencies.
 
 ```javascript
-// app.js
+// server.js
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const passport = require('passport');
 
-require('dotenv').config();
+require('dotenv').config(); 
 
 
 app.use(cookieParser()); // read cookies (needed for auth)
@@ -158,17 +153,18 @@ app.use(authHelpers.loginRequired)
 
 // all other routes go below here
 ```
-We are telling express to use the `cookie-parser`. This is similar to `body-parser` but it parses request cookies. Passport stores user auth info in to cookies.
+`cookie-parser` is similar to `body-parser` but it parses request cookies. Passport stores user auth info into cookies.
 
-We are also telling express to use `express-session` which will allow us to bounce user auth info back and forth every request, so the user doesn't have to reauthenticate every time they visit a new url on our app.
+`express-session`  will allow us to bounce user auth info back and forth every request, so the user doesn't have to reauthenticate every time they visit a new url on our app.
 
-After we tell the app to use passport and passport sessions, we then require an auth router. This will have all of the routes for signing in and creating (registering) a user.
+`auth router` after we tell the app to use `passport` and `passport sessions`, we then require an auth router. This will have all of the routes for signing in and creating (registering) a user.
 
-After that, we are requireing a middleware that we will write called `authHelpers.loginRequired`. We are telling our app to use this function before we tell it to use all of our other routes. This is because we want our app to require a user to be signed in for all routes except the user login and registration pages.
+`authHelpers.loginRequired` tells  our app to use this function before we tell it to use all of our other routes. This is because we want our app to require a user to be signed in for all routes except the user login and registration pages.
 
-> Note: We haven't written this `auth-helpers` middlware or the `auth-routes` yet. But it's still ok to write this in our app.js file because it will give us a sence of what our next tasks sould be.
+> Note: We haven't written this `auth-helpers` middleware or the `auth-routes` yet. But it's still ok to write this in our app.js file because it will give us a sense of what our next tasks should be.
 
-Lastly, for this `app.js` to be configures properly, we need a `.env` file with a SESSION_KEY.
+#### And finally
+For this `server.js` to be configured properly, we need a `.env` file with a SESSION_KEY.
 
 ```bash
 # .env
@@ -182,19 +178,20 @@ SESSION_KEY=whatever_key_you_want
 https://stackoverflow.com/questions/18565512/importance-of-session-secret-key-in-express-web-framework
 
 ## Why's the session key a secret and why do we need it?
-It's used to encrypt the session cookie so that you can be reasonably sure the cookie isn't a fake one, and the connection should be treated as part of the larger session with express.
-This is why you don't put the string in your source code. You make it an environment variable and read it in as process.env("SESSION_SECRET") or you use an .env file with https://npmjs.org/package/habitat, and make sure those files never touch your repository (svn/git exclusion/ignores) so that your secret data stays secret.
-the secret is immutable while your node app runs. 
+Used to encrypt the session cookie so that you can be reasonably sure the cookie isn't a fake one, and the connection should be treated as part of the larger session with express.
 
 
-## Now that our app.js is in order, we can configure passport.
+
+## Now that our server.js is in order, we can configure passport.
+We'll create a services/auth folder and add 3 files to it: `passport.js`, `local.js`, `auth-helpers.js`.
+
 
 ```
 mkdir -p services/auth
 touch services/auth/passport.js services/auth/local.js services/auth/auth-helpers.js
 ```
 
-## Passport
+## 1. Passport
 
 ```javascript
 // services/auth/passport.js
@@ -218,16 +215,15 @@ module.exports = () => {
 };
 ```
 
-#### what does serializeUser do?
+#### what do serializeUser & deserializeUser do?
 https://stackoverflow.com/questions/27637609/understanding-passport-serialize-deserialize
 
 the functions tell Passport.js how to get information from a user object to store in a session (serialize)
 
-#### what does deserializeUser do?
 how to take that information and turn it back into a user object (deserialize)
 
 
-## "Local Strategy"
+## 2 "Local Strategy"
 What, you might ask, is a strategy? Perhaps it seems like a strange word to encounter in the context of programming? Perhaps, but in the context it actually fits well.
 
 One of the key features of Passport as an authentication framework is that it is modular and extensible, meaning that it provides a loose framework for programmers to define their own pathways of authentication. It is opinionated about the series of steps that are followed to perform an authentication, but it remains neutral about the specific way that an application authenticates a user.
@@ -271,7 +267,7 @@ passport.use(
 
 module.exports = passport;
 ```
-## Authentication middleware
+## 3. Authentication middleware
 
 Now that passport has been told how to find a user and check a password for a user, we can create some authentication middleware.
 
@@ -301,7 +297,7 @@ module.exports = {
 }
 ```
 
-The `loginRequired` and `loginRedirect` functions are the actual middleware functions that we are going to insert into our apps function chain to control the flow of a request as it comes in. Remember the Legos! We are going to squeeze these functions somewhere before our route handlers so we can stop the chain if the user is not signed in.
+The `loginRequired` and `loginRedirect` functions are the actual middleware functions that we are going to insert into our apps function chain to control the flow of a request as it comes in. We are going to squeeze these functions somewhere before our route handlers so we can stop the chain if the user is not signed in.
 
 ## Auth routes
 Now that we have out middleware functions set up, we can create our auth routes.
